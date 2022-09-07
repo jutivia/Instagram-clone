@@ -10,14 +10,16 @@ const cors = require("cors");
 const xss = require("xss-clean");
 const rateLimiter = require("express-rate-limit");
 
+const errorHandler = require('./middlewares/error-handler')
 // Routes 
 const notFound = require('./middlewares/not-found')
-
+const UserRoute = require('./routes/userAuth')
+const auth = require('./middlewares/authorization')
 //middlewares
 app.set("trust proxy", 1);
 app.use(
   rateLimiter({
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    windowMs: 10 * 60 * 1000, // 15 minutes
     max: 100, // limit each IP to 100 requests per windowMs
   })
 );
@@ -26,12 +28,15 @@ app.use(cors());
 app.use(xss());
 app.use(express.json());
 
+app.use('/api/v1/user', UserRoute)
 
 
 
 
 
-app.use(notFound);
+
+app.use(notFound, errorHandler);
+
 const start = async () => {
     try {
         await connectDb(process.env.MONGO_URI)

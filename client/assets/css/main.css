@@ -1,0 +1,18 @@
+html {
+  background-color: black;
+  color:white;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  font-family: "Overpass", sans-serif;
+}
+body {
+  /* background-color: #fbfdfd; */
+  min-height: 100vh;
+  margin: 0;
+  line-height: 24px;
+  width: 100%;
+  font-family: 'Overpass';
+  color:white;
+}
