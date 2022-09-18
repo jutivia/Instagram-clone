@@ -20,8 +20,16 @@
         </svg>
         <h2>Happening now</h2>
         <h4>Join Twitter today.</h4>
-        <button class="btn google-sign">Sign up with Google</button>
-        <p class="or"><span>or</span></p>
+        <!-- <button class="btn google-sign" disabled @click="googleSignUp()">
+          Sign up with Google
+        </button>
+        <p class="or"><span>or</span></p> -->
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
         <div class="email">
           <button class="btn email-signup" @click="showSignUp = true">
             Sign up with your email
@@ -59,7 +67,7 @@
           <div class="step-container">
             <div class="single-step" v-if="step === 1">
               <h3>Create your account</h3>
-              <form action="">
+              <div class="form">
                 <div class="input-form">
                   <label class="label-name">Name</label>
                   <input
@@ -167,19 +175,20 @@
                     </div>
                   </div>
                 </div>
-                <div class="next" @click="step = 2">
+                <div class="next" @click="signUp()">
                   <button
                     :disabled="!name || !verifyEmail || !month || !year || !day"
                   >
-                    Next
+                    <span v-if="!loader">Next</span>
+                    <span v-else><Loader /></span>
                   </button>
                 </div>
-              </form>
+              </div>
             </div>
             <div class="single-step" v-if="step === 2">
               <h3>We sent you a code</h3>
               <p class="p-verify-email">Enter it below to verify {{ email }}</p>
-              <form action="">
+              <div class="form">
                 <div class="input-form">
                   <label class="label-name">Verification code</label>
                   <input
@@ -189,16 +198,19 @@
                     type="text"
                     placeholder="Verification code"
                   />
-                  <span class="emailNotReceived"> Resend Email? </span>
+                  <!-- <span class="emailNotReceived"> Resend Email? </span> -->
                 </div>
                 <div class="next">
-                  <button :disabled="!code" @click="step = 3">Next</button>
+                  <button :disabled="!code" @click="sendCode()">
+                    <span v-if="!loader">Next</span>
+                    <span v-else><Loader /></span>
+                  </button>
                 </div>
-              </form>
+              </div>
             </div>
             <div class="single-step" v-if="step === 3">
               <h3>Enter your password</h3>
-              <form action="">
+              <div class="form">
                 <div class="input-form">
                   <label class="label-name">Password</label>
                   <input
@@ -245,9 +257,15 @@
                   </span>
                 </div>
                 <div class="next">
-                  <button :disabled="password !== confirmPassword">Next</button>
+                  <button
+                    :disabled="password !== confirmPassword"
+                    @click="addPassword()"
+                  >
+                    <span v-if="!loader">Next</span>
+                    <span v-else><Loader /></span>
+                  </button>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         </div>
@@ -256,7 +274,13 @@
       <div v-if="login" class="modal-body">
         <div class="modal-container">
           <div class="header">
-            <div @click="login = false" class="close-body">
+            <div
+              @click="
+                login = false;
+                loginStep = 1;
+              "
+              class="close-body"
+            >
               <svg
                 viewBox="0 0 24 24"
                 aria-hidden="true"
@@ -288,9 +312,9 @@
           <div class="step-container">
             <div class="single-step middle-flex" v-if="loginStep === 1">
               <h3>Sign in to Twitter</h3>
-              <button class="btn google-sign">Sign in with Google</button>
-              <p class="or"><span>or</span></p>
-              <form action="" style="width: 85%">
+              <!-- <button class="btn google-sign">Sign in with Google</button>
+              <p class="or"><span>or</span></p> -->
+              <div class="form" style="width: 85%">
                 <div class="input-form" style="width: 100%">
                   <label class="label-name">Email</label>
                   <input
@@ -315,17 +339,20 @@
                   <button
                     class="btn forgot-password"
                     style="width: 100%"
-                    @click="forgotPassword = true"
+                    @click="
+                      forgotPassword = true;
+                      login = false;
+                    "
                   >
                     Forgot password?
                   </button>
                 </div>
-              </form>
+              </div>
             </div>
             <div class="single-step middle-flex" v-if="loginStep === 2">
               <h3>Enter your password</h3>
               <p class="p-verify-email">Enter the password for {{ email }}</p>
-              <form action="" style="width: 85%">
+              <div aclass="form" style="width: 85%">
                 <div class="input-form">
                   <label class="label-name">Password</label>
                   <input
@@ -346,9 +373,12 @@
                 </div>
                 <br />
                 <div class="next">
-                  <button :disabled="!password">Next</button>
+                  <button :disabled="!password" @click="loginUser()">
+                    <span v-if="!loader">Next</span>
+                    <span v-else><Loader /></span>
+                  </button>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         </div>
@@ -357,7 +387,13 @@
       <div v-if="forgotPassword" class="modal-body">
         <div class="modal-container">
           <div class="header">
-            <div @click="forgotPassword = false" class="close-body">
+            <div
+              @click="
+                forgotPassword = false;
+                forgotPasswordStep = 1;
+              "
+              class="close-body"
+            >
               <svg
                 viewBox="0 0 24 24"
                 aria-hidden="true"
@@ -376,7 +412,7 @@
           <div class="step-container">
             <div class="single-step" v-if="forgotPasswordStep === 1">
               <h3>Find your Twiter account</h3>
-              <form action="">
+              <div class="form" action="">
                 <div class="input-form">
                   <label class="label-name">Email</label>
                   <input
@@ -393,15 +429,18 @@
                     Enter a valid email
                   </span>
                 </div>
-                <div class="next" @click="forgotPasswordStep = 2">
-                  <button :disabled="!verifyEmail">Next</button>
+                <div class="next" @click="findEmail()">
+                  <button :disabled="!verifyEmail">
+                    <span v-if="!loader">Next</span>
+                    <span v-else><Loader /></span>
+                  </button>
                 </div>
-              </form>
+              </div>
             </div>
             <div class="single-step" v-if="forgotPasswordStep === 2">
               <h3>We sent you a code</h3>
               <p class="p-verify-email">Enter it below to verify {{ email }}</p>
-              <form action="">
+              <div class="form">
                 <div class="input-form">
                   <label class="label-name">Verification code</label>
                   <input
@@ -411,18 +450,19 @@
                     type="text"
                     placeholder="Verification code"
                   />
-                  <span class="emailNotReceived"> Resend Email? </span>
+                  <!-- <span class="emailNotReceived"> Resend Email? </span> -->
                 </div>
-                <div class="next">
-                  <button :disabled="!code" @click="forgotPasswordStep = 3">
-                    Next
+                <div class="next" @click="goToPassword()">
+                  <button :disabled="!code">
+                    <span v-if="!loader">Next</span>
+                    <span v-else><Loader /></span>
                   </button>
                 </div>
-              </form>
+              </div>
             </div>
             <div class="single-step" v-if="forgotPasswordStep === 3">
               <h3>Enter your new password</h3>
-              <form action="">
+              <div class="form">
                 <div class="input-form">
                   <label class="label-name">Password</label>
                   <input
@@ -469,9 +509,15 @@
                   </span>
                 </div>
                 <div class="next">
-                  <button :disabled="password !== confirmPassword">Next</button>
+                  <button
+                    :disabled="password !== confirmPassword"
+                    @click="ForgotPasswordReset()"
+                  >
+                    <span v-if="!loader">Reset password</span>
+                    <span v-else><Loader /></span>
+                  </button>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         </div>
@@ -513,7 +559,7 @@ export default {
       login: false,
       loginStep: 1,
       forgotPasswordStep: 1,
-      forgotPassword: true,
+      forgotPassword: false,
       step: 1,
       placeholderName: "Name",
       name: "",
@@ -547,6 +593,8 @@ export default {
       passwordError: false,
       confirmPasswordError: false,
       password: "",
+      url: "",
+      loader: false,
     };
   },
   computed: {
@@ -590,14 +638,114 @@ export default {
         this.years.push(i);
       }
     },
-    verification() {},
     async signUp() {
-      const date = new Date(this.year, this.month, this.day);
+      this.loader = true;
+      const monthIndex = this.months.findIndex((x) => x === this.month);
+      const date = new Date(Number(this.year), monthIndex, Number(this.day));
+      console.log(date);
       const data = {
         email: this.email,
-        fullName: this.fullName,
+        fullName: this.name,
         dob: date,
       };
+      const url = await this.$axios
+        .post("/user/signup", data)
+        .catch((err) => console.log(err));
+      if (url) {
+        console.log(url.data.userId);
+        this.$store.commit("setUser_id", url.data.userId);
+        this.step = 2;
+      }
+      this.loader = false;
+    },
+    async sendCode() {
+      this.loader = true;
+      const onfulfilled = await this.$axios
+        .post(`/user/verify/${this.$store.state.user_id}`, {
+          uniqueCode: this.code,
+        })
+        .catch((err) => console.log(err));
+      if (onfulfilled) {
+        this.step = 3;
+      }
+      this.loader = false;
+    },
+    async addPassword() {
+      this.loader = true;
+      const onfulfilled = await this.$axios
+        .put(`/user/password/${this.$store.state.user_id}`, {
+          password: this.password,
+        })
+        .catch((err) => console.log(err));
+      if (onfulfilled) {
+        this.$store.commit("auth/setToken", onfulfilled.data.token);
+        this.$toasted.success("User created successfully").goAway(3000);
+        this.showSignUp = false;
+        this.$router.push("./homepage");
+      }
+      this.loader = false;
+    },
+    goToPassword() {
+      this.loader = true;
+      this.forgotPasswordStep = 3;
+      this.loader = false;
+    },
+    async loginUser() {
+      this.loader = true;
+      const onfulfilled = await this.$axios
+        .post("/user/login", {
+          email: this.email,
+          password: this.password,
+        })
+        .catch((err) => console.log(err));
+      if (onfulfilled) {
+        console.log(onfulfilled);
+        this.$store.commit("auth/setToken", onfulfilled.data.token);
+        this.$toasted.success("User logged in successfully").goAway(3000);
+        this.login = false;
+        this.$router.push("./homepage");
+      }
+      this.loader = false;
+    },
+    async findEmail() {
+      this.loader = true;
+      const onfulfilled = await this.$axios
+        .post("/user/reset-password-code", {
+          email: this.email,
+        })
+        .catch((err) => console.log(err));
+      if (onfulfilled) {
+        this.forgotPasswordStep = 2;
+      }
+      this.loader = false;
+    },
+    async ForgotPasswordReset() {
+      this.loader = true;
+      const onfulfilled = await this.$axios
+        .patch("/user/reset-password", {
+          email: this.email,
+          uniqueCode: this.code,
+          password: this.password,
+        })
+        .catch((err) => console.log(err));
+      if (onfulfilled) {
+        this.forgotPasswordStep = 2;
+        this.$toasted.success(onfulfilled.data.msg).goAway(3000);
+      }
+      this.loader = false;
+    },
+    async googleSignUp() {
+      this.loader = true;
+      const onfulfilled = await this.$axios
+        .get("/user/google/sign-up")
+        .catch((err) => console.log(err));
+      if (onfulfilled) {
+        this.$store.commit("auth/setToken", onfulfilled.data.token);
+        this.$toasted.success("User logged in successfully").goAway(3000);
+        this.login = false;
+        this.$router.push("./homepage");
+      }
+      this.loader = false;
     },
   },
 };
@@ -606,9 +754,11 @@ export default {
 .container {
   min-height: 100%;
   display: grid;
-  grid-template-rows: 6.5fr 0.5fr;
+  grid-template-rows: 10.5fr 0.5fr;
   grid-gap: 0;
-  width: 100vw;
+  max-width: 100vw;
+  position: relative;
+  overflow-x: hidden;
 }
 .main {
   display: grid;
@@ -617,7 +767,7 @@ export default {
   grid-template-rows: 1fr;
   color: white;
   height: 90%;
-  min-width: 100%;
+  max-width: 100vw;
 }
 .section {
   background-image: url("~/assets/images/background-twitter.png");
@@ -666,6 +816,7 @@ h4 {
   font: 14px;
   font-weight: 600;
 }
+
 .google-sign {
   background: white;
   display: flex;
@@ -729,6 +880,7 @@ h4 {
   color: rgb(29, 155, 240);
 }
 .footer {
+  bottom: 0;
   margin-top: 1.5rem;
   margin-bottom: 0;
 }
@@ -743,9 +895,9 @@ h4 {
 .modal-body {
   position: fixed;
   top: 0;
-  left: -7%;
+  left: 0%;
   min-height: 100%;
-  min-width: 110%;
+  min-width: 100%;
   background: #23232395;
   display: flex;
   justify-content: center;
@@ -782,14 +934,14 @@ h4 {
   font-weight: 800;
 }
 .step-container {
-  padding: 1rem 4.5rem;
+  padding: 1rem 3rem;
 }
 .single-step h3 {
   font-size: 29px;
   font-weight: 800;
   padding: 1rem 0;
 }
-form {
+.form {
   padding: 10px 0;
 }
 .input-form {
@@ -910,6 +1062,10 @@ form {
   margin-bottom: 1rem;
   margin-top: -0.5rem;
 }
+button:diabled .btn {
+  cursor: not-allowed;
+  color: grey;
+}
 @media screen and (max-width: 950px) {
   .main {
     display: grid;
@@ -925,11 +1081,28 @@ form {
   .hero {
     margin: 0 auto;
   }
+  .modal-container {
+    width: 80%;
+  }
 }
 @media screen and (max-width: 600px) {
   .hero {
     padding: 3rem 2rem;
     margin: 0 auto;
+  }
+  .single-step h3 {
+    font-size: 20px;
+    line-height: 22px;
+  }
+  .modal-container {
+    width: 90%;
+    height: 100%;
+  }
+  .step-container {
+    padding: 1rem;
+  }
+  .container {
+    grid-template-rows: 6.8fr 0.5fr;
   }
 }
 </style>

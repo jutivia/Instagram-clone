@@ -42,3 +42,4 @@ const toast = {
 if (process.browser) {
   Vue.use(Toasted, toast);
 }
+export default toast;

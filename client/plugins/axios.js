@@ -1,24 +1,22 @@
+import Vue from "vue";
+import Toasted from "vue-toasted";
+Vue.use(Toasted);
 export default function ({ $axios, store }) {
   $axios.onError((error) => {
-    const parsedError = error.response ? error.response.data.message : null;
-    if (parsedError.toLowerCase() === "invalid or expired jwt") {
-      window.location.pathname = "/";
-      store.dispatch("newRoute", window.location.pathname);
-    }
+    const parsedError = error.response ? error.response.data.msg : error.message ? error.message :  null;
+    console.log('parsed', parsedError);
     if (
-      parsedError.toLowerCase().includes("cannot read properties of null") ||
-      parsedError.includes("network")
+      (parsedError &&
+        parsedError.includes(
+          "Cannot read properties of null (reading 'toLowerCase')"
+        )) ||
+      (parsedError && parsedError.includes("Network"))
     ) {
-      // console.log('Check your connection.')
+      Vue.toasted.error("Check your connection.").goAway(3000);
     } else {
-      // console.log(parsedError)
+      Vue.toasted.error(parsedError).goAway(3000);
     }
-    // console.log(parsedError)
-    store.dispatch("dispatchError", parsedError);
-  });
-
-  $axios.onResponse((response) => {
-    store.dispatch("stopLoader");
+    // store.dispatch("dispatchError", parsedError);
   });
 
   $axios.onRequest((_config) => {
