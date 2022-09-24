@@ -11,7 +11,9 @@ const {
 const UserVerification = require('../models/user-verfication')
 
 const signUp = async (req, res) => {
-    const { email, fullName, dob } = req.body
+  const { email, fullName, dob } = req.body
+  const existingUser = await User.findOne({ email });
+  if (existingUser) throw new BadRequest('User already exists');
     const DOB = new Date(dob)
     const year = DOB.getFullYear()
     const currentYear = new Date().getFullYear()
@@ -25,6 +27,7 @@ const signUp = async (req, res) => {
       fullName,
       DateOfBirth: DOB,
       userName,
+      userSignType: 'email'
     });
     const done = await user.sendMail()
     if (!done) throw new InternalServerError('Server error')
@@ -85,30 +88,18 @@ const addPassword = async (req, res) => {
    const approved = user.verified;
    if (!approved) throw new NotVerified("Email not verified");
    const token = user.createJWT();
-   res
-     .status(StatusCodes.CREATED)
-     .json({ msg: "Password created successfully", token });
-}
-
-const updateProfile = async (req, res) => {
-  const { profilePic, userName } = req.body;
-  if (!profilePic && !userName) throw new BadRequest('Enter a profile picture or userName')
-
-  
-   const user = await User.findOneAndUpdate(
-     {
-       _id: req.user.userId,
+   res.status(StatusCodes.CREATED).json({
+     msg: "Password created successfully",
+     token,
+     user: {
+       name: user.fullName,
+       username: user.userName,
+       profile: user.profilePic,
+       id: user._id
      },
-     {  userName },
-     { new: true, runValidators: true }
-   );
-  if (!user) throw new UserNotFound();
-   const approved = user.verified;
-   if (!approved) throw new NotVerified("Email not verified");
-   res
-     .status(StatusCodes.CREATED)
-     .json({ msg: "User details updated successfully" });
+   });
 }
+
 
 const login = async (req, res) => {
   const { email, password } = req.body
@@ -121,9 +112,17 @@ const login = async (req, res) => {
   const approved = user.verified;
   if (!approved) throw new NotVerified("Email not verified");
   const token = user.createJWT();
-  res
-    .status(StatusCodes.CREATED)
-    .json({ token, id: user._id, msg: "user logged in successfully." });
+  res.status(StatusCodes.CREATED).json({
+    token,
+    id: user._id,
+    user: {
+      name: user.fullName,
+      username: user.userName,
+      profile: user.profilePic,
+      id: user._id,
+    },
+    msg: "user logged in successfully.",
+  });
 }
 
 const resetPasswordCode = async (req, res) => {
@@ -186,12 +185,13 @@ const resetPassword = async (req, res) => {
     throw new NotVerified("Email not verified");
   }
 }
+
+
 module.exports = {
   signUp,
   verifyEmail,
-  updateProfile,
   addPassword,
   login,
   resetPasswordCode,
-  resetPassword,
+  resetPassword
 };

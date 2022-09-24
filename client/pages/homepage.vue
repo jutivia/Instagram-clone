@@ -4,7 +4,7 @@
     <div class="newTweet">
       <div class="user">
         <div class="profle-pic">
-          <img src="~/assets/images/home.svg" class="profile_pic" />
+          <img :src="user.profile" class="profile_pic" />
         </div>
         <div class="user-details">
           <textarea
@@ -29,12 +29,28 @@
                 </g>
               </svg>
             </div>
-            <button class="tweet-btn" :disabled="!tweetText">Tweet</button>
+            <button class="tweet-btn" :disabled="!tweetText" @click="tweet()">
+              Tweet
+            </button>
           </div>
         </div>
       </div>
     </div>
-    <Tweets :tweets="tweets" />
+    <div v-if="!pageLoading && !error">
+      <Tweets
+        :tweets="tweets"
+        :likeTweet="likeTweet"
+        :renderComponent="renderComponent"
+        :retweetTweet="retweetTweet"
+        :resize="resize()"
+        :quoteTweet="quoteTweet"
+        :deleteTweet="deleteTweet"
+      />
+    </div>
+    <div v-if="pageLoading" class="loading"><Loader /></div>
+    <div class="showError" v-if="error && !pageLoading">
+      <Error :reload="reload" />
+    </div>
   </div>
 </template>
 
@@ -43,57 +59,97 @@ export default {
   layout: "auth",
   data() {
     return {
+      pageLoading: false,
       loader: false,
       tweetText: "",
-      tweets: [
-        {
-          user: {
-            name: "Jutivia",
-            userName: "@jujuTheBlessed",
-          },
-          time: "20hrs",
-          content: "This is a rad tweet",
-          likes: 10,
-          retweets: 12,
-          comments: 10,
-        },
-        {
-          user: {
-            name: "Jutivia",
-            userName: "@jujuTheBlessed",
-          },
-          time: "20hrs",
-          content: "This is a rad tweet",
-          likes: 10,
-          retweets: 12,
-          comments: 10,
-        },
-        {
-          user: {
-            name: "Jutivia",
-            userName: "@jujuTheBlessed",
-          },
-          time: "20hrs",
-          content: "This is a rad tweet",
-          likes: 10,
-          retweets: 12,
-          comments: 10,
-        },
-        {
-          user: {
-            name: "Jutivia",
-            userName: "@jujuTheBlessed",
-          },
-          time: "20hrs",
-          content: "This is a rad tweet",
-          likes: 10,
-          retweets: 12,
-          comments: 10,
-        },
-      ],
+      tweets: [],
+      renderComponent: 0,
+      error: false,
+      user: this.$store.state.user,
     };
   },
+  created() {
+    this.getTweets();
+    this.$store.commit("setShowDelete", true);
+    console.log(this.$store.state.user);
+  },
+  mounted() {
+    this.resize()
+  },
+  computed: {
+    months() {
+      return [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "June",
+        "July",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+    },
+    watchTweets() {
+      return this.tweets;
+    },
+  },
+  watch: {
+    watchTweets() {
+      this.$forceUpdate();
+    },
+  },
   methods: {
+    reload() {
+      this.error = false;
+      this.getTweets();
+    },
+    async likeTweet(tweetId, index) {
+      const request = await this.$axios
+        .post(`/tweets/${tweetId}/likes`)
+        .catch((err) => console.log(err));
+      if (request) {
+        const liked = this.tweets[index].toggleLike;
+        this.tweets[index].toggleLike = !liked;
+        liked === false
+          ? (this.tweets[index].likeNumber += 1)
+          : (this.tweets[index].likeNumber -= 1);
+        this.renderComponent += 1;
+        // return this.tweets;
+      }
+    },
+    async retweetTweet(tweetId, index) {
+      const request = await this.$axios
+        .post(`/tweets/${tweetId}/retweets`)
+        .catch((err) => console.log(err));
+      if (request) {
+        const retweeted = this.tweets[index].toggleRetweet;
+        this.tweets[index].toggleRetweet = !retweeted;
+        retweeted === false
+          ? (this.tweets[index].retweetNumber += 1)
+          : (this.tweets[index].retweetNumber -= 1);
+        this.renderComponent += 1;
+        // return this.tweets;
+      }
+    },
+    async getTweets() {
+      this.pageLoading = true;
+      const request = await this.$axios.get("/tweets").catch((err) => {
+        this.error = true;
+        this.pageLoading = false;
+      });
+      if (request) {
+        this.tweets = request.data.tweets;
+        this.tweets.map((tweet) => {
+          tweet.toggleLike = tweet.likedByCurrentUser;
+          tweet.toggleRetweet = tweet.retweetedByCurrentUser;
+        });
+      }
+      this.pageLoading = false;
+    },
     async logout() {
       this.loader = true;
       const onfulfilled = await this.$axios
@@ -105,11 +161,72 @@ export default {
       }
       this.loader = false;
     },
-   resize () {
+    resize() {
       let element = this.$refs["textarea"];
 
       element.style.height = "18px";
       element.style.height = element.scrollHeight + "px";
+    },
+    async tweet() {
+      this.loader = true;
+      const onfulfilled = await this.$axios
+        .post("/tweets", {
+          content: this.tweetText,
+        })
+        .catch((err) => console.log(err));
+      if (onfulfilled) {
+        this.$toasted.success("Tweet sent successfully").goAway(2500);
+        this.tweetText = "";
+        this.getTweets();
+      }
+      this.loader = false;
+    },
+    async quoteTweet(tweetText, tweetId) {
+      const request = await this.$axios
+        .post(`/tweets/${tweetId}/quote-tweet`, {
+          content: tweetText,
+        })
+        .catch((err) => console.log(err));
+      if (request) {
+        const req = await this.$axios
+          .get("/tweets")
+          .catch((err) => console.log(err));
+        this.$store.commit("setQuoteModal", false);
+        if (req) {
+          this.tweets = req.data.tweets;
+          this.tweets.map((tweet) => {
+            tweet.toggleLike = tweet.likedByCurrentUser;
+            tweet.toggleRetweet = tweet.retweetedByCurrentUser;
+          });
+        }
+        this.renderComponent += 1;
+      }
+    },
+    async deleteTweet(tweetId) {
+      this.$store.commit("setLoading", true);
+      this.$store.commit("setShowDelete", true);
+      const request = await this.$axios
+        .delete(`/tweets/${tweetId}`)
+        .catch((err) => {
+          this.$store.commit("setLoading", false);
+          this.$store.commit("setShowDelete", false);
+        });
+      if (request) {
+        this.$toasted.success("Tweet deleted successfully").goAway(2500);
+        this.$store.commit("setLoading", false);
+        this.$store.commit("setShowDelete", false);
+        const req = await this.$axios
+          .get("/tweets")
+          .catch((err) => console.log(err));
+        if (req) {
+          this.tweets = req.data.tweets;
+          this.tweets.map((tweet) => {
+            tweet.toggleLike = tweet.likedByCurrentUser;
+            tweet.toggleRetweet = tweet.retweetedByCurrentUser;
+          });
+        }
+        this.renderComponent += 1;
+      }
     },
   },
 };
@@ -119,7 +236,7 @@ export default {
 .newTweet {
   width: 100%;
   border-bottom: 0.1px solid #e2e2ea37;
-  padding: 4rem 2rem;
+  padding: 2.5rem 16px;
   padding-bottom: 1rem;
 }
 .user,
@@ -145,9 +262,9 @@ export default {
 }
 .icons {
   display: flex;
-  margin-top: 2rem;
+  margin-top: 0rem;
   justify-content: space-between;
-  align-items:center;
+  align-items: center;
   width: 100%;
   border-top: 0.1px solid #e2e2ea37;
   padding-top: 1rem;
@@ -162,6 +279,8 @@ button.tweet-btn {
   padding: 0.5rem 1.5rem;
   border-radius: 20px;
   font-weight: 500;
+  border: none;
+  color: rgb(231, 233, 234);
 }
 button:disabled.tweet-btn {
   background: rgba(29, 156, 240, 0.563);
@@ -172,7 +291,7 @@ button:disabled.tweet-btn {
   width: 100%;
   background-color: transparent;
   padding: 1rem 0rem;
-  font-size: 24px;
+  /* font-size: 24px; */
   color: rgb(231, 233, 234);
 }
 .text-area:focus {
@@ -183,10 +302,17 @@ button:disabled.tweet-btn {
   color: rgba(255, 255, 255, 0.387);
 }
 textarea {
-  font-size: 20px;
-  min-height: 32px;
+  font-size: 18px;
+  /* min-height: 32px; */
   padding: 2px;
   resize: none;
   overflow: hidden;
+  border: none;
+  font-weight: 500;
+}
+.loading {
+  margin: 2rem auto;
+  display: flex;
+  justify-content: center;
 }
 </style>

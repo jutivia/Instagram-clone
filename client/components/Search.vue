@@ -88,6 +88,8 @@ export default {
   width: 100%;
   background: transparent;
   padding: 0 1rem;
+  border: none;
+  color: rgb(231, 233, 234);
 }
 .search:focus-within {
   border: 1px solid rgb(29, 155, 240);

@@ -197,7 +197,23 @@ export default {
       },
     };
   },
+  created() {
+    this.getUser();
+  },
   methods: {
+    async getUser() {
+      const User = await this.$axios.get("/tweets").catch((err) => {
+        this.error = true;
+        this.pageLoading = false;
+      });
+      if (request) {
+        this.tweets = request.data.tweets;
+        this.tweets.map((tweet) => {
+          tweet.toggleLike = tweet.likedByCurrentUser;
+          tweet.toggleRetweet = tweet.retweetedByCurrentUser;
+        });
+      }
+    },
     event(_ev, tab) {
       this.$emit("tab", tab);
       this.activeTab = tab;

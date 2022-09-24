@@ -22,13 +22,15 @@ body {
   position: absolute;
   font-size: 22px;
   font-weight: 600;
-  padding: 0rem 2rem;
-  padding-top: 2rem;
+  padding: 0rem 16px;
+  padding-top: 1.5rem;
   width: 100%;
   padding-bottom: 1rem;
-  background: rgba(255, 255, 255, 0.024);
+   background-color: rgba(255, 255, 255, 0.078);  
+ backdrop-filter: blur(5px);
   display:flex;
   gap:2rem;
+  max-height: 53px;
   align-items:center;
 }
 .main-container {
@@ -61,4 +63,41 @@ body {
   background: rgb(113, 118, 123);
   border-radius: 50%;
   margin-top: 9px;
+}
+
+.modal-body {
+  position: fixed;
+  top: 0;
+  left: 0%;
+  min-height: 100%;
+  min-width: 100%;
+  background: #23232395;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+.modal-container {
+  width: 40%;
+  background: black;
+  color: rgb(231, 233, 234);
+  padding: 1rem;
+  border-radius: 20px;
+}
+.header {
+  display: flex;
+  gap: 2rem;
+}
+.close {
+  fill: currentcolor;
+  width: 19px;
+  height: 19px;
+}
+.close-body {
+  padding: 10px 10px 5px 10px;
+}
+.close-body:hover {
+  background: rgba(255, 255, 255, 0.126);
+  /* padding:10px; */
+  border-radius: 50%;
 }

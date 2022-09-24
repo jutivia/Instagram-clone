@@ -24,7 +24,7 @@ export default {
   plugins: [
     { src: "~/plugins/vue-toasted", ssr: false },
     { src: "~/plugins/axios" },
-    // { src: "~/plugins/vuex-persist", ssr: false },
+    { src: "~/plugins/vuex-persist", ssr: false },
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -39,9 +39,14 @@ export default {
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: ["@nuxtjs/pwa", "@nuxtjs/axios"],
   axios: {
-    baseURL: 'http://localhost:8000/api/v1',  // Used as fallback if no runtime config is provided
+    baseURL: "http://localhost:8000/api/v1", // Used as fallback if no runtime config is provided
     progress: true,
   },
-
+  buildModules: [
+    // Nuxt 2 only:
+    // https://composition-api.nuxtjs.org/getting-started/setup#quick-start
+    "@nuxtjs/composition-api/module",
+    "@pinia/nuxt",
+  ],
   build: {},
 };

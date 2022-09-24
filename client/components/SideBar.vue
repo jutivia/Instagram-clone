@@ -227,8 +227,8 @@ export default {
   font-size: 1rem;
   line-height: 1.125rem;
   text-align: center;
-  margin-left: 2.5rem;
-  margin-top: 3rem;
+  margin-left: 0rem;
+  margin-top: 1rem;
 }
 
 .icon {

@@ -21,8 +21,8 @@ export default {
     return {};
   },
   created() {
-    console.log(this.$store);
-    // this.isUserTokenStored();
+    // console.log(this.$store);
+    this.isUserTokenStored();
   },
   methods: {
     isUserTokenStored() {
@@ -54,7 +54,7 @@ export default {
   min-width: 100%;
 }
 .rhs{
-  width:40%;
+  width:60%;
 }
 @media only screen and (min-width: 1400px) {
   .middle {

@@ -188,6 +188,10 @@
             <div class="single-step" v-if="step === 2">
               <h3>We sent you a code</h3>
               <p class="p-verify-email">Enter it below to verify {{ email }}</p>
+              <span>
+                If you haven't received an email within a few minutes, check
+                your spam folder. Verification codes expire after 15 minutes.
+              </span>
               <div class="form">
                 <div class="input-form">
                   <label class="label-name">Verification code</label>
@@ -440,6 +444,11 @@
             <div class="single-step" v-if="forgotPasswordStep === 2">
               <h3>We sent you a code</h3>
               <p class="p-verify-email">Enter it below to verify {{ email }}</p>
+              <span
+                >If you haven't received an email within a few minutes, check
+                your spam folder. Verification codes expire after 15
+                minutes.</span
+              >
               <div class="form">
                 <div class="input-form">
                   <label class="label-name">Verification code</label>
@@ -678,7 +687,8 @@ export default {
         })
         .catch((err) => console.log(err));
       if (onfulfilled) {
-        this.$store.commit("auth/setToken", onfulfilled.data.token);
+        this.$store.commit("setToken", onfulfilled.data.token);
+        this.$store.commit("setUser", onfulfilled.data.user);
         this.$toasted.success("User created successfully").goAway(3000);
         this.showSignUp = false;
         this.$router.push("./homepage");
@@ -700,7 +710,8 @@ export default {
         .catch((err) => console.log(err));
       if (onfulfilled) {
         console.log(onfulfilled);
-        this.$store.commit("auth/setToken", onfulfilled.data.token);
+        this.$store.commit("setToken", onfulfilled.data.token);
+        this.$store.commit("setUser", onfulfilled.data.user);
         this.$toasted.success("User logged in successfully").goAway(3000);
         this.login = false;
         this.$router.push("./homepage");
@@ -892,42 +903,6 @@ h4 {
   font-size: 14px;
   flex-wrap: wrap;
 }
-.modal-body {
-  position: fixed;
-  top: 0;
-  left: 0%;
-  min-height: 100%;
-  min-width: 100%;
-  background: #23232395;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-}
-.modal-container {
-  width: 40%;
-  background: black;
-  color: rgb(231, 233, 234);
-  padding: 1rem;
-  border-radius: 20px;
-}
-.header {
-  display: flex;
-  gap: 2rem;
-}
-.close {
-  fill: currentcolor;
-  width: 19px;
-  height: 19px;
-}
-.close-body {
-  padding: 10px;
-}
-.close-body:hover {
-  background: rgba(255, 255, 255, 0.126);
-  /* padding:10px; */
-  border-radius: 50%;
-}
 .steps {
   margin-top: 10px;
   font-size: 18px;
@@ -982,6 +957,7 @@ h4 {
   font-size: 15px;
   border-radius: 5px;
   transition: all 0.2s cubic-bezier(0.215, 0.61, 0.355, 1);
+  color: rgb(231, 233, 234);
 }
 .error {
   border: 1px solid red;

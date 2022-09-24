@@ -4,6 +4,7 @@ const random = require("randomstring");
 const crypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const UserVerification = require('./user-verfication')
+const Following = require('./following-table')
 const { InternalServerError } = require('../errors')
 
 const UserSchema = new mongoose.Schema({
@@ -16,9 +17,14 @@ const UserSchema = new mongoose.Schema({
     ],
     required: [true, "Kindly enter your email addres"],
   },
+  userSignType: {
+    type: String,
+    enums: ['email', 'googleId']
+  },
   fullName: {
     type: String,
-    required: [true, "kindly enter your full name"]
+    required: [true, "kindly enter your full name"],
+    maxLength: [50, 'must be 50 characters or less']
   },
   DateOfBirth: {
       type: Date,
@@ -36,7 +42,8 @@ const UserSchema = new mongoose.Schema({
     },
     userName: {
         type: String,
-        unique: [true, 'Kindly enter your user name']
+      unique: [true, 'Kindly enter your user name'],
+      maxLength: [15, 'must be 15 characters or less']
     },
     followingNumber: {
         type: Number,
@@ -155,5 +162,14 @@ UserSchema.methods.sendResetPasswordCode = async function () {
     );
   });
   return done;
+}
+
+UserSchema.methods.getUserFollowings = async function () {
+      const following = await Following.find({
+        userId: tweetPosterId,
+      }).count();
+  this.followingNumber = following
+  const followers = await Following.find({ followingId: this._id }).count()
+  this.followersNumber = followers
 }
 module.exports = mongoose.model("User", UserSchema)

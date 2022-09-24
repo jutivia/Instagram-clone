@@ -18,7 +18,8 @@ export default {
 <style scoped>
 .loader {
   margin-top: 0;
-  border: 3px solid #f3f3f3;
+  border: 3px solid rgb(29, 155, 240);
+  /* background: rgb(29, 155, 240); */
   border-radius: 50%;
   border-top: 3px solid #000;
   width: 20px;
